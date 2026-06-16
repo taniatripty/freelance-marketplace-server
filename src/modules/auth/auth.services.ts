@@ -34,3 +34,28 @@ export const registerUserIntoDB = async (user: any) => {
   const result = await userCollection.insertOne(user);
   return result;
 };
+
+export const loginUserFromDB = async (
+  email: string,
+  password: string
+) => {
+  const db = getDB();
+
+  const userCollection =
+    db.collection("users");
+
+  const user =
+    await userCollection.findOne({
+      email,
+    });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (user.password !== password) {
+    throw new Error("Invalid password");
+  }
+
+  return user;
+};
