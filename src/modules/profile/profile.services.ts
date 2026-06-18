@@ -1,4 +1,64 @@
+import { ObjectId } from "mongodb";
 import { getDB } from "../../confing/db";
+
+// export const becomeFreelancerService = async (payload: any) => {
+//   const db = getDB();
+
+//   const usersCollection = db.collection("users");
+//   const freelancerCollection = db.collection("freelancer");
+
+//   const {
+//     userId,
+//     title,
+//     bio,
+//     skills,
+//     languages,
+//     experience,
+//     hourlyRate,
+//     portfolio,
+//   } = payload;
+
+//   // 1. Check user exists in USERS collection
+//   const user = await usersCollection.findOne({ uid: userId });
+
+//   if (!user) {
+//     throw new Error("User not found");
+//   }
+
+//   // 2. Check already freelancer or not (optional but recommended)
+//   const existingFreelancer = await freelancerCollection.findOne({
+//     userId,
+//   });
+
+//   if (existingFreelancer) {
+//     throw new Error("Already a freelancer");
+//   }
+
+//   // 3. Update user role in USERS collection
+//   await usersCollection.updateOne(
+//     { uid: userId },
+//     {
+//       $set: {
+//         role: "freelancer",
+//       },
+//     }
+//   );
+
+//   // 4. Insert freelancer profile in freelancer collection
+//   const result = await freelancerCollection.insertOne({
+//     userId,
+//     title,
+//     bio,
+//     skills,
+//     languages,
+//     experience,
+//     hourlyRate,
+//     portfolio,
+//     createdAt: new Date(),
+//   });
+
+//   return result;
+// };
 
 export const becomeFreelancerService = async (payload: any) => {
   const db = getDB();
@@ -15,16 +75,23 @@ export const becomeFreelancerService = async (payload: any) => {
     experience,
     hourlyRate,
     portfolio,
+    name,
+    email,
   } = payload;
 
-  // 1. Check user exists in USERS collection
+  // ---------------- VALIDATION ----------------
+  if (!userId || !title || !bio) {
+    throw new Error("Missing required fields");
+  }
+
+  // ---------------- CHECK USER ----------------
   const user = await usersCollection.findOne({ uid: userId });
 
   if (!user) {
     throw new Error("User not found");
   }
 
-  // 2. Check already freelancer or not (optional but recommended)
+  // ---------------- CHECK EXISTING FREELANCER ----------------
   const existingFreelancer = await freelancerCollection.findOne({
     userId,
   });
@@ -33,28 +100,69 @@ export const becomeFreelancerService = async (payload: any) => {
     throw new Error("Already a freelancer");
   }
 
-  // 3. Update user role in USERS collection
-  await usersCollection.updateOne(
+  // ---------------- UPDATE ROLE ----------------
+  const updateResult = await usersCollection.updateOne(
     { uid: userId },
     {
       $set: {
         role: "freelancer",
+        updatedAt: new Date(),
       },
     }
   );
 
-  // 4. Insert freelancer profile in freelancer collection
-  const result = await freelancerCollection.insertOne({
+  if (updateResult.modifiedCount === 0) {
+    throw new Error("Failed to update user role");
+  }
+
+  // ---------------- CREATE FREELANCER ----------------
+  const freelancerDoc = {
     userId,
+    name: name || user.name || "",
+    email: email || user.email || "",
     title,
     bio,
-    skills,
-    languages,
-    experience,
-    hourlyRate,
-    portfolio,
+    skills: skills || [],
+    languages: languages || [],
+    experience: experience || "",
+    hourlyRate: hourlyRate || 0,
+    portfolio: portfolio || [],
+    rating: 0,
+    totalJobs: 0,
     createdAt: new Date(),
-  });
+    updatedAt: new Date(),
+  };
 
-  return result;
+  const result = await freelancerCollection.insertOne(freelancerDoc);
+
+  // ---------------- RETURN CLEAN RESPONSE ----------------
+  return {
+    insertedId: result.insertedId,
+    ...freelancerDoc,
+  };
+};
+export const getAllFreelancersService = async () => {
+  const db = getDB();
+
+  const freelancerCollection =
+    db.collection("freelancer");
+
+  const freelancers = await freelancerCollection
+    .find({})
+    .toArray();
+
+  return freelancers;
+};
+
+export const getSingleFreelancerService = async (
+  id: string
+) => {
+  const db = getDB();
+
+  const freelancerCollection =
+    db.collection("freelancer");
+
+  return await freelancerCollection.findOne({
+    _id: new ObjectId(id),
+  });
 };

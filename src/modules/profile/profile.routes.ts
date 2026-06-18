@@ -1,10 +1,12 @@
 import express from "express";
-import { becomeFreelancerController } from "./profile.controller";
+import { becomeFreelancerController, getAllFreelancersController, getSingleFreelancerController } from "./profile.controller";
 
 
 const router = express.Router();
 
-// POST /api/freelancer/become
+
 router.post("/become-freelancer", becomeFreelancerController);
+router.get("/", getAllFreelancersController);
+router.get("/:id", getSingleFreelancerController);
 
 export const profileRoutes= router;
