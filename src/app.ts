@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { AuthRoutes } from "./modules/auth/auth.routes";
 import { profileRoutes } from "./modules/profile/profile.routes";
 import { CategoriesRoutes } from "./modules/categories/categories.routes";
+import { createGigs } from "./modules/gigs/gigs.routes";
 
 const app = express();
 
@@ -25,4 +26,5 @@ app.get("/", (req, res) => {
 app.use("/auth", AuthRoutes)
 app.use("/freelancer", profileRoutes)
 app.use("/categories",CategoriesRoutes)
+app.use("/gigs", createGigs)
 export default app;

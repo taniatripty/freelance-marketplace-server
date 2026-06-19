@@ -40,3 +40,17 @@ export const createCategoryService = async (payload: any) => {
 
   return result;
 };
+
+
+
+export const getAllCategoriesService = async () => {
+  const db = getDB();
+  const categoryCollection = db.collection("categories");
+
+  const categories = await categoryCollection
+    .find({})
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  return categories;
+};
