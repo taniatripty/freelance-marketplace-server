@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { AuthRoutes } from "./modules/auth/auth.routes";
 import { profileRoutes } from "./modules/profile/profile.routes";
+import { CategoriesRoutes } from "./modules/categories/categories.routes";
 
 const app = express();
 
@@ -23,5 +24,5 @@ app.get("/", (req, res) => {
 });
 app.use("/auth", AuthRoutes)
 app.use("/freelancer", profileRoutes)
-
+app.use("/categories",CategoriesRoutes)
 export default app;
