@@ -9,6 +9,7 @@ import { CategoriesRoutes } from "./modules/categories/categories.routes";
 import { createGigs } from "./modules/gigs/gigs.routes";
 import { createOrders } from "./modules/oders/order.routes";
 import { messageRoutes } from "./modules/message/messaga.routes";
+import { notificationRoutes } from "./modules/notification/notification.routes";
 
 const app = express();
 
@@ -31,4 +32,5 @@ app.use("/categories",CategoriesRoutes)
 app.use("/gigs", createGigs)
 app.use("/orders", createOrders)
 app.use("/chat",messageRoutes)
+app.use("/notifications",notificationRoutes)
 export default app;

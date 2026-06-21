@@ -1,10 +1,59 @@
-import { Request, Response } from "express";
-import { getChatService, sendMessageService } from "./message.services";
+// import { Request, Response } from "express";
+// import { getChatService, sendMessageService } from "./message.services";
 
+// export const sendMessageController = async (req: Request, res: Response) => {
+//   try {
+//     console.log("CHAT BODY:", req.body); // DEBUG IMPORTANT
+
+//     const result = await sendMessageService(req.body);
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Message sent successfully",
+//       data: result,
+//     });
+//   } catch (error: any) {
+//     console.error("CHAT ERROR:", error.message);
+
+//     return res.status(400).json({
+//       success: false,
+//       message: error.message || "Failed to send message",
+//     });
+//   }
+// };
+
+// export const getChatController = async (req: Request, res: Response) => {
+//   try {
+//     const { orderId } = req.params;
+
+//     const result = await getChatService(orderId as string);
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Chat fetched successfully",
+//       data: result,
+//     });
+//   } catch (error: any) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message || "Failed to fetch chat",
+//     });
+//   }
+// };
+
+import { Request, Response } from "express";
+import {
+  sendMessageService,
+  getChatService,
+  markAsReadService,
+  getAllUnreadService,
+} from "./message.services";
+
+/**
+ * SEND MESSAGE
+ */
 export const sendMessageController = async (req: Request, res: Response) => {
   try {
-    console.log("CHAT BODY:", req.body); // DEBUG IMPORTANT
-
     const result = await sendMessageService(req.body);
 
     return res.status(200).json({
@@ -13,30 +62,72 @@ export const sendMessageController = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error: any) {
-    console.error("CHAT ERROR:", error.message);
-
     return res.status(400).json({
       success: false,
-      message: error.message || "Failed to send message",
+      message: error.message,
     });
   }
 };
 
+/**
+ * GET CHAT
+ */
 export const getChatController = async (req: Request, res: Response) => {
   try {
     const { orderId } = req.params;
 
     const result = await getChatService(orderId as string);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Chat fetched successfully",
       data: result,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: error.message || "Failed to fetch chat",
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * MARK AS READ
+ */
+export const markAsReadController = async (req: Request, res: Response) => {
+  try {
+    const { orderId, userId } = req.body;
+
+    const result = await markAsReadService(orderId, userId);
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * GET ALL UNREAD
+ */
+export const getAllUnreadController = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await getAllUnreadService(userId as string);
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
