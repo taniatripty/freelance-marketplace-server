@@ -20,7 +20,8 @@
     "express": "^5.2.1",
     "mongodb": "^7.3.0",
     "multer": "^2.2.0",
-    "multer-storage-cloudinary": "^4.0.0"
+    "multer-storage-cloudinary": "^4.0.0",
+    "stripe": "^22.2.2"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",

@@ -178,3 +178,17 @@ export const updateOrderStatusService = async (
     status,
   };
 };
+
+export const getOrderByIdService = async (orderId: string) => {
+  if (!ObjectId.isValid(orderId)) {
+    throw new Error("Invalid order ID");
+  }
+
+  const db = getDB();
+
+  const order = await db.collection("orders").findOne({
+    _id: new ObjectId(orderId),
+  });
+
+  return order;
+};

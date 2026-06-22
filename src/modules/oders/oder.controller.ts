@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createOrderService, getMyOrdersService, getSellerOrdersService, updateOrderStatusService } from "./order.services";
+import { createOrderService, getMyOrdersService, getOrderByIdService, getSellerOrdersService, updateOrderStatusService } from "./order.services";
 
 
 export const createOrderController = async (req: Request, res: Response) => {
@@ -127,6 +127,31 @@ export const updateOrderStatusController = async (
     return res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+export const getOrderById = async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await getOrderByIdService(orderId as string);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Server error",
     });
   }
 };

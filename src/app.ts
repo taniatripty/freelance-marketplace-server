@@ -10,6 +10,7 @@ import { createGigs } from "./modules/gigs/gigs.routes";
 import { createOrders } from "./modules/oders/order.routes";
 import { messageRoutes } from "./modules/message/messaga.routes";
 import { notificationRoutes } from "./modules/notification/notification.routes";
+import { paymentRoutes } from "./modules/payment/payment.routes";
 
 const app = express();
 
@@ -33,4 +34,5 @@ app.use("/gigs", createGigs)
 app.use("/orders", createOrders)
 app.use("/chat",messageRoutes)
 app.use("/notifications",notificationRoutes)
+app.use("/payments",paymentRoutes)
 export default app;
