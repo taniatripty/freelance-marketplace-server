@@ -2,6 +2,7 @@ import Stripe from "stripe";
 
 import { ObjectId } from "mongodb";
 import { getDB } from "../../confing/db";
+import { createNotificationService } from "../notification/notification.services";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -41,9 +42,35 @@ export const createPaymentIntentService = async (
   });
 
   return {
-    clientSecret: paymentIntent.client_secret,
+     id: paymentIntent.id,
+    clientSecret: paymentIntent.client_secret!,
   };
 };
+
+
+// export const paymentSuccessService = async (
+//   orderId: string,
+//   transactionId: string
+// ) => {
+//   const db = getDB();
+
+//   const orderCollection = db.collection("orders");
+
+//   const result = await orderCollection.updateOne(
+//     {
+//       _id: new ObjectId(orderId),
+//     },
+//     {
+//       $set: {
+//         paymentStatus: "paid",
+//         transactionId,
+//         paidAt: new Date(),
+//       },
+//     }
+//   );
+
+//   return result;
+// };
 
 
 export const paymentSuccessService = async (
@@ -51,21 +78,41 @@ export const paymentSuccessService = async (
   transactionId: string
 ) => {
   const db = getDB();
+  const orders = db.collection("orders");
 
-  const orderCollection = db.collection("orders");
+  const order = await orders.findOne({
+    _id: new ObjectId(orderId),
+  });
 
-  const result = await orderCollection.updateOne(
-    {
-      _id: new ObjectId(orderId),
-    },
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  // 1. Update order payment status
+  await orders.updateOne(
+    { _id: new ObjectId(orderId) },
     {
       $set: {
         paymentStatus: "paid",
+        status: "completed",
         transactionId,
-        paidAt: new Date(),
+        updatedAt: new Date(),
       },
     }
   );
 
-  return result;
+  // 2. 🔥 CREATE NOTIFICATION (IMPORTANT PART)
+  await createNotificationService({
+    userId: order.sellerId, // notify seller
+    senderId: order.buyerId,
+    type: "payment",
+    title: "Payment Received 💰",
+    message: `You received $${order.price} for "${order.gigTitle}"`,
+    orderId: orderId,
+  });
+
+  return {
+    success: true,
+    message: "Payment updated + notification sent",
+  };
 };

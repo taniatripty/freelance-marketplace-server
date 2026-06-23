@@ -1,5 +1,5 @@
 import express from "express";
-import { createPaymentIntentController, paymentSuccessController } from "./payment.controller";
+import { createPaymentIntentController,  paymentSuccessController } from "./payment.controller";
 
 
 const router = express.Router();
@@ -9,4 +9,6 @@ router.patch(
   "/success/:orderId",
   paymentSuccessController
 );
+
+
 export const paymentRoutes= router;

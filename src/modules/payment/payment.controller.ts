@@ -1,5 +1,34 @@
 import { Request, Response } from "express";
-import { createPaymentIntentService, paymentSuccessService } from "./payment.services";
+import { createPaymentIntentService,  paymentSuccessService } from "./payment.services";
+
+
+// export const createPaymentIntentController = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   try {
+//     const { orderId, amount } = req.body;
+
+//     if (!orderId || !amount) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "orderId and amount required",
+//       });
+//     }
+
+//     const result = await createPaymentIntentService(orderId, amount);
+
+//     res.status(200).json({
+//       success: true,
+//       data: result,
+//     });
+//   } catch (error: any) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
 
 
 export const createPaymentIntentController = async (
@@ -9,26 +38,67 @@ export const createPaymentIntentController = async (
   try {
     const { orderId, amount } = req.body;
 
-    if (!orderId || !amount) {
+    // validation
+    if (!orderId) {
       return res.status(400).json({
         success: false,
-        message: "orderId and amount required",
+        message: "orderId is required",
       });
     }
 
-    const result = await createPaymentIntentService(orderId, amount);
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid amount is required",
+      });
+    }
 
-    res.status(200).json({
+    const paymentIntent =
+      await createPaymentIntentService(
+        orderId,
+        Number(amount)
+      );
+
+    return res.status(200).json({
       success: true,
-      data: result,
+      data: {
+        clientSecret: paymentIntent.clientSecret,
+        paymentIntentId: paymentIntent.id,
+      },
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
+
+// export const paymentSuccessController = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   try {
+//     const { orderId } = req.params;
+//     const { transactionId } = req.body;
+
+//     const result = await paymentSuccessService(
+//       orderId as string,
+//       transactionId
+//     );
+
+//     res.status(200).json({
+//       success: true,
+//       data: result,
+//       message: "Payment updated successfully",
+//     });
+//   } catch (error: any) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
 
 
 export const paymentSuccessController = async (
@@ -39,18 +109,25 @@ export const paymentSuccessController = async (
     const { orderId } = req.params;
     const { transactionId } = req.body;
 
+    if (!orderId || !transactionId) {
+      return res.status(400).json({
+        success: false,
+        message: "orderId and transactionId required",
+      });
+    }
+
     const result = await paymentSuccessService(
       orderId as string,
       transactionId
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
+      message: "Payment successful",
       data: result,
-      message: "Payment updated successfully",
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
