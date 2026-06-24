@@ -18,6 +18,7 @@ export const createGigController = async (req: Request, res: Response) => {
       tags,
       features,
       images,
+      totalSales
     } = req.body;
 
     // ---------------- VALIDATION ----------------
@@ -41,6 +42,7 @@ export const createGigController = async (req: Request, res: Response) => {
       revisions,
       tags,
       features,
+      totalSales,
       images: images || [],
     };
 

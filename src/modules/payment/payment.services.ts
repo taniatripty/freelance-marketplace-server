@@ -48,28 +48,50 @@ export const createPaymentIntentService = async (
 };
 
 
+
+
 // export const paymentSuccessService = async (
 //   orderId: string,
 //   transactionId: string
 // ) => {
 //   const db = getDB();
+//   const orders = db.collection("orders");
 
-//   const orderCollection = db.collection("orders");
+//   const order = await orders.findOne({
+//     _id: new ObjectId(orderId),
+//   });
 
-//   const result = await orderCollection.updateOne(
-//     {
-//       _id: new ObjectId(orderId),
-//     },
+//   if (!order) {
+//     throw new Error("Order not found");
+//   }
+
+//   // 1. Update order payment status
+//   await orders.updateOne(
+//     { _id: new ObjectId(orderId) },
 //     {
 //       $set: {
 //         paymentStatus: "paid",
+        
 //         transactionId,
-//         paidAt: new Date(),
+//         updatedAt: new Date(),
 //       },
 //     }
 //   );
 
-//   return result;
+//   // 2. 🔥 CREATE NOTIFICATION (IMPORTANT PART)
+//   await createNotificationService({
+//     userId: order.sellerId, // notify seller
+//     senderId: order.buyerId,
+//     type: "payment",
+//     title: "Payment Received 💰",
+//     message: `You received $${order.price} for "${order.gigTitle}"`,
+//     orderId: orderId,
+//   });
+
+//   return {
+//     success: true,
+//     message: "Payment updated + notification sent",
+//   };
 // };
 
 
@@ -78,8 +100,11 @@ export const paymentSuccessService = async (
   transactionId: string
 ) => {
   const db = getDB();
-  const orders = db.collection("orders");
 
+  const orders = db.collection("orders");
+  const gigs = db.collection("gigs"); // 🔥 ADD THIS
+
+  // ---------------- FIND ORDER ----------------
   const order = await orders.findOne({
     _id: new ObjectId(orderId),
   });
@@ -88,22 +113,31 @@ export const paymentSuccessService = async (
     throw new Error("Order not found");
   }
 
-  // 1. Update order payment status
+  // ---------------- UPDATE ORDER ----------------
   await orders.updateOne(
     { _id: new ObjectId(orderId) },
     {
       $set: {
         paymentStatus: "paid",
-        status: "completed",
         transactionId,
         updatedAt: new Date(),
       },
     }
   );
 
-  // 2. 🔥 CREATE NOTIFICATION (IMPORTANT PART)
+  // ---------------- 🔥 UPDATE TOTAL SALES ----------------
+  await gigs.updateOne(
+    { _id: new ObjectId(order.gigId) }, // IMPORTANT
+    {
+      $inc: {
+        totalSales: 1, // ✔ increase sales
+      },
+    }
+  );
+
+  // ---------------- NOTIFICATION ----------------
   await createNotificationService({
-    userId: order.sellerId, // notify seller
+    userId: order.sellerId,
     senderId: order.buyerId,
     type: "payment",
     title: "Payment Received 💰",
@@ -113,6 +147,6 @@ export const paymentSuccessService = async (
 
   return {
     success: true,
-    message: "Payment updated + notification sent",
+    message: "Payment updated + totalSales updated + notification sent",
   };
 };

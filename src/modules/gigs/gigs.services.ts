@@ -20,6 +20,7 @@ export const createGigService = async (payload: any) => {
     deliveryDays,
     revisions,
     images,
+    totalSales
   } = payload;
 
   const gig = {
@@ -38,7 +39,7 @@ export const createGigService = async (payload: any) => {
     rating: 0,
     tags,
     features,
-    totalSales: 0,
+    totalSales,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
