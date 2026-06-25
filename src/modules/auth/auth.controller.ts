@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { registerUserIntoDB } from "./auth.services";
+import { getUserByUidService, registerUserIntoDB } from "./auth.services";
 import {
   loginUserFromDB,
 } from "./auth.services";
@@ -77,6 +77,27 @@ export const loginUser = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: error.message || "Server error",
+    });
+  }
+};
+
+export const getUserController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { uid } = req.params;
+
+    const user = await getUserByUidService(uid as string);
+
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error: any) {
+    return res.status(404).json({
+      success: false,
+      message: error.message,
     });
   }
 };

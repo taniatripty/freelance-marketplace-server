@@ -105,3 +105,17 @@ export const getSingleGigService = async (id: string) => {
     _id: new ObjectId(id),
   });
 };
+
+export const getMyGigsService = async (
+  sellerId: string
+) => {
+  const db = getDB();
+
+  const gigs = await db
+    .collection("gigs")
+    .find({ sellerId })
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  return gigs;
+};

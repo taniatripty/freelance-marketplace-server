@@ -36,3 +36,19 @@ export const loginUserFromDB = async (email: string) => {
 
   return user;
 };
+
+export const getUserByUidService = async (
+  uid: string
+) => {
+  const db = getDB();
+
+  const user = await db
+    .collection("users")
+    .findOne({ uid });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
+};

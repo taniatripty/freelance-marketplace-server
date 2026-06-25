@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createGigService, getAllGigsService, getSingleGigService } from "./gigs.services";
+import { createGigService, getAllGigsService, getMyGigsService, getSingleGigService } from "./gigs.services";
 
 
 export const createGigController = async (req: Request, res: Response) => {
@@ -100,6 +100,37 @@ export const getSingleGigController = async (
     return res.status(200).json({
       success: true,
       data: gig,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+export const getMyGigsController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { sellerId } = req.params;
+
+    if (!sellerId) {
+      return res.status(400).json({
+        success: false,
+        message: "Seller ID is required",
+      });
+    }
+
+    const gigs = await getMyGigsService(
+      sellerId as string
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: gigs,
     });
   } catch (error: any) {
     return res.status(500).json({
