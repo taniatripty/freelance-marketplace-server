@@ -1,6 +1,13 @@
 import express from "express";
-import {createOrderController, getMyOrdersController, getOrderById, getSellerOrdersController, updateOrderStatusController } from "./oder.controller";
-
+import {
+  cancelOrderController,
+  createOrderController,
+  getMyOrdersController,
+  getOrderById,
+  getSellerOrdersController,
+  sellerCancelOrderController,
+  updateOrderStatusController,
+} from "./oder.controller";
 
 const router = express.Router();
 
@@ -9,5 +16,9 @@ router.get("/buyer/:buyerId", getMyOrdersController);
 router.get("/seller/:sellerId", getSellerOrdersController);
 router.get("/:orderId", getOrderById);
 router.patch("/:id", updateOrderStatusController);
-
-export  const createOrders=router;
+router.patch("/cancel/:id", cancelOrderController);
+router.patch(
+  "/seller-cancel/:id",
+  sellerCancelOrderController
+);
+export const createOrders = router;

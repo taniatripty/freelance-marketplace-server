@@ -105,7 +105,8 @@ export const updateOrderStatusService = async (
     "accepted",
     "in_progress",
     "completed",
-    "cancelled",
+    "cancelled_by_buyer",
+    "cancelled_by_seller",
   ];
 
   if (!allowedStatus.includes(status)) {
@@ -152,3 +153,95 @@ export const getOrderByIdService = async (orderId: string) => {
 };
 
 
+export const cancelOrderService = async (
+  id: string
+) => {
+  const db = getDB();
+  const orders = db.collection("orders");
+
+  const order = await orders.findOne({
+    _id: new ObjectId(id),
+  });
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  if (order.paymentStatus === "paid") {
+    throw new Error(
+      "Paid orders cannot be cancelled"
+    );
+  }
+
+  if (order.status === "completed") {
+    throw new Error(
+      "Completed orders cannot be cancelled"
+    );
+  }
+
+  if (
+    order.status === "cancelled_by_buyer" ||
+    order.status === "cancelled_by_seller"
+  ) {
+    throw new Error(
+      "Order already cancelled"
+    );
+  }
+
+  await orders.updateOne(
+    { _id: new ObjectId(id) },
+    {
+      $set: {
+        status: "cancelled_by_buyer",
+        updatedAt: new Date(),
+      },
+    }
+  );
+
+  return {
+    success: true,
+  };
+};
+
+export const sellerCancelOrderService =
+  async (id: string) => {
+    const db = getDB();
+    const orders = db.collection("orders");
+
+    const order = await orders.findOne({
+      _id: new ObjectId(id),
+    });
+
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    if (order.paymentStatus === "paid") {
+      throw new Error(
+        "Paid orders cannot be cancelled"
+      );
+    }
+
+    if (order.status === "completed") {
+      throw new Error(
+        "Completed orders cannot be cancelled"
+      );
+    }
+
+    await orders.updateOne(
+      {
+        _id: new ObjectId(id),
+      },
+      {
+        $set: {
+          status: "cancelled_by_seller",
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    return {
+      success: true,
+       message: "Order cancelled successfully"
+    };
+  };

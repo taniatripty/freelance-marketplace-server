@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {  createOrderService, getMyOrdersService, getOrderByIdService, getSellerOrdersService, updateOrderStatusService } from "./order.services";
+import {  cancelOrderService, createOrderService, getMyOrdersService, getOrderByIdService, getSellerOrdersService, sellerCancelOrderService, updateOrderStatusService } from "./order.services";
 
 
 export const createOrderController = async (req: Request, res: Response) => {
@@ -156,3 +156,49 @@ export const getOrderById = async (req: Request, res: Response) => {
   }
 };
 
+export const cancelOrderController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+
+    const order = await cancelOrderService(id as string);
+
+    res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+export const sellerCancelOrderController =
+  async (
+    req: Request,
+    res: Response
+  ) => {
+    try {
+      const { id } = req.params;
+
+      const result =
+        await sellerCancelOrderService(
+          id as string
+        );
+
+      return res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error: any) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
