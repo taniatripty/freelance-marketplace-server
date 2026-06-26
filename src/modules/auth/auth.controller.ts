@@ -9,7 +9,7 @@ import {
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
-    const { uid, name, email,  role } = req.body;
+    const { uid, name, email,  role, photoURL, } = req.body;
 
     // validation (Firebase handles password, so no password here)
     if (!uid || !name || !email) {
@@ -23,9 +23,10 @@ export const registerUser = async (req: Request, res: Response) => {
       uid,
       name,
       email,
-      
+      photoURL,
       role: role || "client",
       createdAt: new Date(),
+       updatedAt: new Date()
     };
 
     const result = await registerUserIntoDB(newUser);
