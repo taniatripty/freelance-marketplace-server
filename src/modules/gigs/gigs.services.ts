@@ -66,7 +66,9 @@ export const getAllGigsService = async (query: any) => {
   } = query;
 
   // ---------------- FILTER BUILD ----------------
-  const filter: any = {};
+  const filter: any = {
+      status: "active",
+  };
 
   if (categoryId) {
     filter.categoryId = categoryId;
@@ -118,4 +120,71 @@ export const getMyGigsService = async (
     .toArray();
 
   return gigs;
+};
+
+
+
+export const updateGigIntoDB = async (
+  id: string,
+  data: any
+) => {
+  const db = getDB();
+
+  const gigCollection = db.collection("gigs");
+
+  const updateDoc = {
+    $set: {
+      title: data.title,
+      shortDescription: data.shortDescription,
+      description: data.description,
+      categoryId: data.categoryId,
+
+      price: Number(data.price),
+      deliveryDays: Number(data.deliveryDays),
+      revisions: Number(data.revisions),
+
+      tags: data.tags,
+      features: data.features,
+      images: data.images,
+
+      updatedAt: new Date(),
+    },
+  };
+
+  const result = await gigCollection.findOneAndUpdate(
+    {
+      _id: new ObjectId(id),
+    },
+    updateDoc,
+    {
+      returnDocument: "after",
+    }
+  );
+
+  return result;
+};
+
+export const deleteGigFromDB = async (
+  id: string
+) => {
+  const db = getDB();
+
+  const gigCollection = db.collection("gigs");
+
+  const result = await gigCollection.findOneAndUpdate(
+    {
+      _id: new ObjectId(id),
+    },
+    {
+      $set: {
+        status: "deleted",
+        updatedAt: new Date(),
+      },
+    },
+    {
+      returnDocument: "after",
+    }
+  );
+
+  return result;
 };

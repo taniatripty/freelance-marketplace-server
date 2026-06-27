@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createGigController, getAllGigsController, getMyGigsController, getSingleGigController } from "./gigs.controller";
+import { createGigController, deleteGig, getAllGigsController, getMyGigsController, getSingleGigController, updateGig } from "./gigs.controller";
 
 
 const router = Router();
@@ -11,4 +11,6 @@ router.get(
   "/my/:sellerId",
   getMyGigsController
 );
+router.put("/update/:id", updateGig);
+router.delete("/delete/:id", deleteGig);
 export const createGigs= router;

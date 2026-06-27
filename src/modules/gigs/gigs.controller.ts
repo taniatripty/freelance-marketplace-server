@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createGigService, getAllGigsService, getMyGigsService, getSingleGigService } from "./gigs.services";
+import { createGigService, deleteGigFromDB, getAllGigsService, getMyGigsService, getSingleGigService, updateGigIntoDB } from "./gigs.services";
 
 
 export const createGigController = async (req: Request, res: Response) => {
@@ -139,3 +139,63 @@ export const getMyGigsController = async (
     });
   }
 };
+
+
+export const updateGig = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+
+    const updatedGig = await updateGigIntoDB(id as string, req.body);
+
+    if (!updatedGig) {
+      return res.status(404).json({
+        success: false,
+        message: "Gig not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Gig updated successfully",
+      data: updatedGig,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
+
+export const deleteGig = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+
+    const result = await deleteGigFromDB(id as string);
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Gig not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Gig deleted successfully.",
+      data: result,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  };
+}
