@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {  cancelOrderService, createOrderService, getMyOrdersService, getOrderByIdService, getSellerOrdersService, sellerCancelOrderService, updateOrderStatusService } from "./order.services";
+import {  cancelOrderService, createOrderService, getMyOrdersService, getOrderByIdService, getSellerEarningsService, getSellerOrdersService, sellerCancelOrderService, updateOrderStatusService } from "./order.services";
 
 
 export const createOrderController = async (req: Request, res: Response) => {
@@ -202,3 +202,28 @@ export const sellerCancelOrderController =
       });
     }
   };
+
+  export const getSellerEarnings = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { sellerId } = req.params;
+
+    const result =
+      await getSellerEarningsService(sellerId as string);
+
+    res.status(200).json({
+      success: true,
+      message: "Seller earnings fetched successfully.",
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};

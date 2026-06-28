@@ -245,3 +245,33 @@ export const sellerCancelOrderService =
        message: "Order cancelled successfully"
     };
   };
+
+
+  export const getSellerEarningsService = async (
+  sellerId: string
+) => {
+  const db = getDB();
+
+  const orderCollection = db.collection("orders");
+
+  const orders = await orderCollection
+    .find({
+      sellerId,
+      status: "completed",
+      paymentStatus: "paid",
+    })
+    .sort({ completedAt: -1 })
+    .toArray();
+
+  const totalEarning = orders.reduce(
+    (sum: number, order: any) =>
+      sum + (order.price || 0),
+    0
+  );
+
+  return {
+    totalEarning,
+    totalOrders: orders.length,
+    orders,
+  };
+};

@@ -4,6 +4,7 @@ import {
   createOrderController,
   getMyOrdersController,
   getOrderById,
+  getSellerEarnings,
   getSellerOrdersController,
   sellerCancelOrderController,
   updateOrderStatusController,
@@ -20,5 +21,9 @@ router.patch("/cancel/:id", cancelOrderController);
 router.patch(
   "/seller-cancel/:id",
   sellerCancelOrderController
+);
+router.get(
+  "/earnings/:sellerId",
+  getSellerEarnings
 );
 export const createOrders = router;

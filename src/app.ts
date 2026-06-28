@@ -12,6 +12,7 @@ import { messageRoutes } from "./modules/message/messaga.routes";
 import { notificationRoutes } from "./modules/notification/notification.routes";
 import { paymentRoutes } from "./modules/payment/payment.routes";
 import { reviewsRoute } from "./modules/reviews/reviews.routes";
+import { statisticsRoutes } from "./modules/statistics/statistics.routes";
 
 const app = express();
 
@@ -37,4 +38,5 @@ app.use("/chat",messageRoutes)
 app.use("/notifications",notificationRoutes)
 app.use("/payments",paymentRoutes)
 app.use("/reviews", reviewsRoute);
+app.use("/stas",statisticsRoutes)
 export default app;

@@ -98,3 +98,209 @@ export const getReviewsByGigService = async (gigId: string) => {
 
   return reviews;
 };
+
+export const createWebsiteReviewService =
+  async (payload: any) => {
+    const db = getDB();
+
+    const collection = db.collection(
+      "website_reviews"
+    );
+
+    const alreadyReviewed =
+      await collection.findOne({
+        uid: payload.uid,
+      });
+
+    if (alreadyReviewed) {
+      throw new Error(
+        "You have already submitted a review."
+      );
+    }
+
+    const review = {
+      ...payload,
+
+      helpfulCount: 0,
+
+      createdAt: new Date(),
+
+      updatedAt: new Date(),
+    };
+
+    await collection.insertOne(review);
+
+    return review;
+  };
+
+  export const getWebsiteReviewsService =
+  async () => {
+    const db = getDB();
+
+    return await db
+      .collection("website_reviews")
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+  };
+
+
+ // services/review.service.ts
+
+
+
+// export const getBuyerReviewsService = async (
+//   buyerId: string
+// ) => {
+//   const db = getDB();
+
+//   const reviews = await db
+//     .collection("reviews")
+//     .aggregate([
+//       {
+//         $match: {
+//           buyerId,
+//         },
+//       },
+
+//       {
+//         $lookup: {
+//           from: "orders",
+//           let: {
+//             orderId: {
+//               $toObjectId: "$orderId",
+//             },
+//           },
+//           pipeline: [
+//             {
+//               $match: {
+//                 $expr: {
+//                   $eq: ["$_id", "$$orderId"],
+//                 },
+//               },
+//             },
+//           ],
+//           as: "orders",
+//         },
+//       },
+
+//       {
+//         $unwind: {
+//           path: "$orders",
+//           preserveNullAndEmptyArrays: true,
+//         },
+//       },
+
+//       {
+//         $project: {
+//           _id: 1,
+//           rating: 1,
+//           comment: 1,
+//           createdAt: 1,
+
+//           orderTitle: "$orders.title",
+//           orderPrice: "$orders.price",
+//           orderImage: "$orders.gigImage",
+//         },
+//       },
+
+//       {
+//         $sort: {
+//           createdAt: -1,
+//         },
+//       },
+//     ])
+//     .toArray();
+
+//   return reviews;
+// };
+
+export const getBuyerReviewsService = async (buyerId: string) => {
+  const db = getDB();
+
+  return await db.collection("reviews")
+    .aggregate([
+      {
+        $match: {
+          buyerId,
+        },
+      },
+
+      // Order
+      {
+        $lookup: {
+          from: "orders",
+          let: {
+            orderId: {
+              $toObjectId: "$orderId",
+            },
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$_id", "$$orderId"],
+                },
+              },
+            },
+          ],
+          as: "order",
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$order",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // Gig
+      {
+        $lookup: {
+          from: "gigs",
+          let: {
+            gigId: {
+              $toObjectId: "$gigId",
+            },
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$_id", "$$gigId"],
+                },
+              },
+            },
+          ],
+          as: "gig",
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$gig",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $project: {
+          rating: 1,
+          comment: 1,
+          createdAt: 1,
+
+          orderTitle: "$gig.title",
+          orderImage: "$gig.images",
+          orderPrice: "$gig.price",
+        },
+      },
+
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+    ])
+    .toArray();
+};
