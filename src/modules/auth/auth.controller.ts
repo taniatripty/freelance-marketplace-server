@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getUserByUidService, registerUserIntoDB } from "./auth.services";
+import { getUserByUidService, registerUserIntoDB, updateProfileService } from "./auth.services";
 import {
   loginUserFromDB,
 } from "./auth.services";
@@ -97,6 +97,31 @@ export const getUserController = async (
     });
   } catch (error: any) {
     return res.status(404).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const updateProfile = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { uid } = req.params;
+
+    const result = await updateProfileService(
+      uid as string,
+      req.body
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
       success: false,
       message: error.message,
     });

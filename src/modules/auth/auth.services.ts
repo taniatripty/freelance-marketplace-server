@@ -80,3 +80,24 @@ export const getUserByUidService = async (
 
   return user;
 };
+
+export const updateProfileService = async (
+  uid: string,
+  payload: any
+) => {
+  const db = getDB();
+
+  const userCollection = db.collection("users");
+
+  const result = await userCollection.updateOne(
+    { uid },
+    {
+      $set: {
+        ...payload,
+        updatedAt: new Date(),
+      },
+    }
+  );
+
+  return result;
+};
