@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getUserByUidService, registerUserIntoDB, updateProfileService } from "./auth.services";
+import { getAllUsersService, getUserByUidService, registerUserIntoDB, updateProfileService, updateUserRoleService } from "./auth.services";
 import {
   loginUserFromDB,
 } from "./auth.services";
@@ -78,6 +78,75 @@ export const loginUser = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: error.message || "Server error",
+    });
+  }
+};
+
+
+export const getAllUsers = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const users = await getAllUsersService();
+
+    res.status(200).json({
+      success: true,
+      message: "Users fetched successfully",
+      data: users,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch users",
+    });
+  }
+};
+export const updateUserRole = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { uid } = req.params;
+    const { role } = req.body;
+
+    const allowedRoles = [
+      "admin",
+      "client",
+      "freelancer",
+    ];
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role",
+      });
+    }
+
+    const result = await updateUserRoleService(
+      uid as string,
+      role
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Role updated to ${role}`,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
     });
   }
 };

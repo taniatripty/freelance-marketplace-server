@@ -35,7 +35,7 @@ export const createGigService = async (payload: any) => {
     deliveryDays: Number(deliveryDays),
     revisions: Number(revisions),
     images: images || [],
-    status: "active",
+    status: "pending",
     rating: 0,
     tags,
     features,
@@ -53,7 +53,20 @@ export const createGigService = async (payload: any) => {
 };
 
 
-export const getAllGigsService = async (query: any) => {
+export const getAllGigsService = async () => {
+  const db = getDB();
+
+  const gigs = await db
+    .collection("gigs")
+    .find({})
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  return gigs;
+};
+
+
+export const getAllActiveGigsService = async (query: any) => {
   const db = getDB();
   const gigCollection = db.collection("gigs");
 

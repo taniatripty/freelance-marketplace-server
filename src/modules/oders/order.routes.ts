@@ -2,6 +2,8 @@ import express from "express";
 import {
   cancelOrderController,
   createOrderController,
+  getBuyerCompletedProjects,
+  getbuyerpayment,
   getMyOrdersController,
   getOrderById,
   getSellerEarnings,
@@ -25,5 +27,14 @@ router.patch(
 router.get(
   "/earnings/:sellerId",
   getSellerEarnings
+);
+
+router.get(
+  "/payment/:buyerId",
+  getbuyerpayment
+);
+router.get(
+  "/buyer/completed/:buyerId",
+  getBuyerCompletedProjects
 );
 export const createOrders = router;

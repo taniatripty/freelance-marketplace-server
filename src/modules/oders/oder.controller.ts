@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {  cancelOrderService, createOrderService, getMyOrdersService, getOrderByIdService, getSellerEarningsService, getSellerOrdersService, sellerCancelOrderService, updateOrderStatusService } from "./order.services";
+import {  cancelOrderService, createOrderService, getBuyerCompletedProjectsService, getbuyerpaymentService, getMyOrdersService, getOrderByIdService, getSellerEarningsService, getSellerOrdersService, sellerCancelOrderService, updateOrderStatusService } from "./order.services";
 
 
 export const createOrderController = async (req: Request, res: Response) => {
@@ -224,6 +224,64 @@ export const sellerCancelOrderController =
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
+    });
+  }
+};
+
+ export const getbuyerpayment = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { buyerId } = req.params;
+
+    const result =
+      await getbuyerpaymentService(buyerId as string);
+
+    res.status(200).json({
+      success: true,
+      message: "buyer payment fetched successfully.",
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+
+export const getBuyerCompletedProjects = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { buyerId } = req.params;
+
+    if (!buyerId) {
+      return res.status(400).json({
+        success: false,
+        message: "Buyer ID is required.",
+      });
+    }
+
+    const completedProjects =
+      await getBuyerCompletedProjectsService(buyerId as string);
+
+    return res.status(200).json({
+      success: true,
+      message: "Completed projects fetched successfully.",
+      data: completedProjects,
+    });
+  } catch (error) {
+    console.error("Get Buyer Completed Projects Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
     });
   }
 };

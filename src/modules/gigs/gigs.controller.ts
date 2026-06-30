@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createGigService, deleteGigFromDB, getAllGigsService, getMyGigsService, getSingleGigService, updateGigIntoDB } from "./gigs.services";
+import { createGigService, deleteGigFromDB, getAllActiveGigsService,  getAllGigsService,  getMyGigsService, getSingleGigService, updateGigIntoDB } from "./gigs.services";
 
 
 export const createGigController = async (req: Request, res: Response) => {
@@ -61,12 +61,32 @@ export const createGigController = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllGigsController = async (
+export const getAllGigs = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const gigs = await getAllGigsService(req.query);
+    const gigs = await getAllGigsService();
+
+    return res.status(200).json({
+      success: true,
+      data: gigs,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+export const getAllActiveGigsController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const gigs = await getAllActiveGigsService(req.query);
 
     return res.status(200).json({
       success: true,

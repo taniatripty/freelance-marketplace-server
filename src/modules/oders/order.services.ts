@@ -275,3 +275,111 @@ export const sellerCancelOrderService =
     orders,
   };
 };
+
+export const getbuyerpaymentService = async (
+  buyerId: string
+) => {
+  const db = getDB();
+
+  const orderCollection = db.collection("orders");
+
+  const orders = await orderCollection
+    .find({
+      buyerId,
+      status: "completed",
+      paymentStatus: "paid",
+    })
+    .sort({ completedAt: -1 })
+    .toArray();
+
+  const totalPayment = orders.reduce(
+    (sum: number, order: any) =>
+      sum + (order.price || 0),
+    0
+  );
+
+  return {
+    totalPayment,
+    totalOrders: orders.length,
+    orders,
+  };
+};
+
+
+
+
+export const getBuyerCompletedProjectsService = async (
+  buyerId: string
+) => {
+  const db = getDB();
+
+  return await db
+    .collection("orders")
+    .aggregate([
+      {
+        $match: {
+          buyerId,
+          status: "completed",
+        },
+      },
+
+      // Join gigs collection
+      {
+        $lookup: {
+          from: "gigs",
+          let: {
+            gigId: { $toObjectId: "$gigId" },
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$_id", "$$gigId"],
+                },
+              },
+            },
+            {
+              $project: {
+                images: 1,
+                deliveryDays: 1,
+                
+              },
+            },
+          ],
+          as: "gig",
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$gig",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $project: {
+          _id: 1,
+
+          gigTitle: 1,
+          price: 1,
+          sellerName: 1,
+          sellerId: 1,
+          status: 1,
+          createdAt: 1,
+          completedAt: 1,
+
+          gigImage: "$gig.images",
+          deliveryTime: "$gig.deliveryDays",
+          
+        },
+      },
+
+      {
+        $sort: {
+          completedAt: -1,
+        },
+      },
+    ])
+    .toArray();
+};

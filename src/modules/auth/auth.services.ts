@@ -1,28 +1,5 @@
 
-
 import { getDB } from "../../confing/db";
-
-
-
-
-// export const registerUserIntoDB = async (user: any) => {
-  
-//   // ✅ move here
-//   const db=getDB();
-//  const userCollection = db.collection("users");
-
-//   const existingUser = await userCollection.findOne({
-//     email: user.email,
-//   });
-
-//   if (existingUser) {
-//     throw new Error("User already exists");
-//   }
-
-//   const result = await userCollection.insertOne(user);
-//   return result;
-// };
-
 
 export const registerUserIntoDB = async (user: any) => {
   const db = getDB();
@@ -63,6 +40,37 @@ export const loginUserFromDB = async (email: string) => {
   }
 
   return user;
+};
+
+export const getAllUsersService = async () => {
+  const db = getDB();
+
+  const users = await db
+    .collection("users")
+    .find({})
+    .sort({
+      createdAt: -1,
+    })
+    .toArray();
+
+  return users;
+};
+
+export const updateUserRoleService = async (
+  uid: string,
+  role: string
+) => {
+  const db = getDB();
+
+  return await db.collection("users").updateOne(
+    { uid },
+    {
+      $set: {
+        role,
+        updatedAt: new Date(),
+      },
+    }
+  );
 };
 
 export const getUserByUidService = async (
