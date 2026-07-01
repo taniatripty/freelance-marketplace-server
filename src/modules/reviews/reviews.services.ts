@@ -304,3 +304,89 @@ export const getBuyerReviewsService = async (buyerId: string) => {
     ])
     .toArray();
 };
+
+
+
+export const getAllReviewsService = async () => {
+  const db = getDB();
+
+  const reviewsCollection = db.collection("reviews");
+  const usersCollection = db.collection("users");
+  const gigsCollection = db.collection("gigs");
+
+  const reviews = await reviewsCollection
+    .find({})
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  if (!reviews.length) return [];
+
+  // Collect ids
+  const buyerIds = [
+    ...new Set(reviews.map((r) => r.buyerId).filter(Boolean)),
+  ];
+
+  const sellerIds = [
+    ...new Set(reviews.map((r) => r.sellerId).filter(Boolean)),
+  ];
+
+  const gigIds = [
+    ...new Set(
+      reviews
+        .map((r) => r.gigId)
+        .filter(Boolean)
+        .map((id) => new ObjectId(id))
+    ),
+  ];
+
+  // Fetch users
+  const buyers = await usersCollection
+    .find({ uid: { $in: buyerIds } })
+    .toArray();
+
+  const sellers = await usersCollection
+    .find({ uid: { $in: sellerIds } })
+    .toArray();
+
+  // Fetch gigs
+  const gigs = await gigsCollection
+    .find({
+      _id: {
+        $in: gigIds,
+      },
+    })
+    .toArray();
+
+  // Merge everything
+  const result = reviews.map((review) => {
+    const buyer = buyers.find(
+      (user) => user.uid === review.buyerId
+    );
+
+    const seller = sellers.find(
+      (user) => user.uid === review.sellerId
+    );
+
+    const gig = gigs.find(
+      (g) => g._id.toString() === review.gigId
+    );
+
+    return {
+      ...review,
+
+      buyerName: buyer?.name || "",
+      buyerEmail: buyer?.email || "",
+      buyerPhoto: buyer?.photoURL || "",
+
+      sellerName: seller?.name || "",
+      sellerEmail: seller?.email || "",
+      sellerPhoto: seller?.photoURL || "",
+
+      gigTitle: gig?.title || "",
+      gigImage: gig?.images?.[0] || "",
+      category: gig?.category || "",
+    };
+  });
+
+  return result;
+};

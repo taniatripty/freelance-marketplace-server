@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createGigService, deleteGigFromDB, getAllActiveGigsService,  getAllGigsService,  getMyGigsService, getSingleGigService, updateGigIntoDB } from "./gigs.services";
+import { createGigService, deleteGigFromDB, getAllActiveGigsService,  getAllGigsService,  getMyGigsService, getSingleGigService, updateGigIntoDB, updateGigStatusService } from "./gigs.services";
 
 
 export const createGigController = async (req: Request, res: Response) => {
@@ -219,3 +219,41 @@ export const deleteGig = async (
     });
   };
 }
+
+export const updateGigStatus = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["active", "suspended"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status",
+      });
+    }
+
+    const result = await updateGigStatusService(id as string, status);
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Gig not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Gig ${status} successfully`,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update gig status",
+    });
+  }
+};

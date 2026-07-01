@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createReviewService, createWebsiteReviewService, getBuyerReviewsService,  getReviewsByGigService, getWebsiteReviewsService } from "./reviews.services";
+import { createReviewService, createWebsiteReviewService, getAllReviewsService, getBuyerReviewsService,  getReviewsByGigService, getWebsiteReviewsService } from "./reviews.services";
 
 
 export const createReview = async (
@@ -110,6 +110,28 @@ export const getBuyerReviews = async (
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
+    });
+  }
+};
+
+
+export const getAllReviews = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const reviews = await getAllReviewsService();
+
+    return res.status(200).json({
+      success: true,
+      data: reviews,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch reviews.",
     });
   }
 };

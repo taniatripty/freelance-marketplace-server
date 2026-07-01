@@ -2,6 +2,9 @@ import express from "express";
 import {
   cancelOrderController,
   createOrderController,
+  getAdminOrderDetails,
+  getAlladminOrders,
+ 
   getBuyerCompletedProjects,
   getbuyerpayment,
   getMyOrdersController,
@@ -9,12 +12,14 @@ import {
   getSellerEarnings,
   getSellerOrdersController,
   sellerCancelOrderController,
+  suspendOrder,
   updateOrderStatusController,
 } from "./oder.controller";
 
 const router = express.Router();
 
 router.post("/", createOrderController);
+router.get("/all/admin", getAlladminOrders);
 router.get("/buyer/:buyerId", getMyOrdersController);
 router.get("/seller/:sellerId", getSellerOrdersController);
 router.get("/:orderId", getOrderById);
@@ -37,4 +42,11 @@ router.get(
   "/buyer/completed/:buyerId",
   getBuyerCompletedProjects
 );
+
+router.patch("/admin/:id/suspend", suspendOrder);
+router.get(
+  "/admin/:id",
+  getAdminOrderDetails
+);
+
 export const createOrders = router;

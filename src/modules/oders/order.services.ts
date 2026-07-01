@@ -383,3 +383,145 @@ export const getBuyerCompletedProjectsService = async (
     ])
     .toArray();
 };
+
+export const getAlladminOrdersService = async () => {
+  const db = getDB();
+
+  const ordersCollection = db.collection("orders");
+  const usersCollection = db.collection("users");
+
+  // Get all orders
+  const orders = await ordersCollection
+    .find({})
+    .sort({ createdAt: -1 })
+    .toArray();
+
+  // Get all users
+  const users = await usersCollection.find({}).toArray();
+
+  // Merge buyer & seller information
+  const result = orders.map((order) => {
+    const buyer = users.find(
+      (user) => user.uid === order.buyerId
+    );
+
+    const seller = users.find(
+      (user) => user.uid === order.sellerId
+    );
+
+    return {
+      ...order,
+
+      buyerName: buyer?.name || "Unknown",
+      buyerEmail: buyer?.email || "",
+      buyerPhoto: buyer?.photoURL || "",
+
+      sellerName: seller?.name || "Unknown",
+      sellerEmail: seller?.email || "",
+      sellerPhoto: seller?.photoURL || "",
+    };
+  });
+
+  return result;
+};
+
+
+
+export const suspendOrderService = async (id: string) => {
+  const db = getDB();
+
+  const ordersCollection = db.collection("orders");
+
+  const order = await ordersCollection.findOne({
+    _id: new ObjectId(id),
+  });
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  if (
+    order.status === "completed" ||
+    order.status === "cancelled_by_buyer" ||
+    order.status === "cancelled_by_seller"
+  ) {
+    throw new Error("This order cannot be suspended.");
+  }
+
+  await ordersCollection.updateOne(
+    {
+      _id: new ObjectId(id),
+    },
+    {
+      $set: {
+        status: "suspended",
+      },
+    }
+  );
+
+  return;
+};
+
+
+
+export const getAdminOrderDetailsService = async (orderId: string) => {
+  const db = getDB();
+
+  const ordersCollection = db.collection("orders");
+  const usersCollection = db.collection("users");
+  const gigsCollection = db.collection("gigs");
+
+  // Get Order
+  const order = await ordersCollection.findOne({
+    _id: new ObjectId(orderId),
+  });
+
+  if (!order) {
+    return null;
+  }
+
+  // Get Gig
+  const gig = await gigsCollection.findOne({
+    _id: new ObjectId(order.gigId),
+  });
+
+  // Get All Users
+  const users = await usersCollection.find().toArray();
+
+  // Find Buyer
+  const buyer = users.find(
+    (user) => user.uid === order.buyerId
+  );
+
+  // Find Seller
+  const seller = users.find(
+    (user) => user.uid === order.sellerId
+  );
+
+  return {
+    _id: order._id,
+    status: order.status,
+    price: order.price,
+    requirement: order.requirement,
+    createdAt: order.createdAt,
+
+    gigTitle: gig?.title,
+    gigImage: gig?.images?.[0],
+    category: gig?.category,
+    deliveryDays: gig?.deliveryDays,
+
+    buyer: {
+      uid: buyer?.uid,
+      name: buyer?.name,
+      email: buyer?.email,
+      photoURL: buyer?.photoURL,
+    },
+
+    seller: {
+      uid: seller?.uid,
+      name: seller?.name,
+      email: seller?.email,
+      photoURL: seller?.photoURL,
+    },
+  };
+};

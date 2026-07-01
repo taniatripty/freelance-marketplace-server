@@ -1,5 +1,5 @@
 import express from "express";
-import { createReview, createWebsiteReview, getBuyerReviews, getReviewsByGigController, getWebsiteReviews } from "./reviews.controller";
+import { createReview, createWebsiteReview, getAllReviews, getBuyerReviews, getReviewsByGigController, getWebsiteReviews } from "./reviews.controller";
 
 const router = express.Router();
 
@@ -11,4 +11,6 @@ router.get(
   "/buyer/:buyerId",
   getBuyerReviews
 );
+
+router.get("/admin", getAllReviews);
 export const reviewsRoute= router;

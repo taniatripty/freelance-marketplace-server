@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {  cancelOrderService, createOrderService, getBuyerCompletedProjectsService, getbuyerpaymentService, getMyOrdersService, getOrderByIdService, getSellerEarningsService, getSellerOrdersService, sellerCancelOrderService, updateOrderStatusService } from "./order.services";
+import {  cancelOrderService, createOrderService, getAdminOrderDetailsService, getAlladminOrdersService, getBuyerCompletedProjectsService, getbuyerpaymentService, getMyOrdersService, getOrderByIdService, getSellerEarningsService, getSellerOrdersService, sellerCancelOrderService, suspendOrderService, updateOrderStatusService } from "./order.services";
 
 
 export const createOrderController = async (req: Request, res: Response) => {
@@ -282,6 +282,81 @@ export const getBuyerCompletedProjects = async (
     return res.status(500).json({
       success: false,
       message: "Internal Server Error.",
+    });
+  }
+};
+
+
+
+export const getAlladminOrders = async (
+  req: Request,
+  res: Response
+) => {
+   try {
+    const orders = await getAlladminOrdersService();
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+    });
+  }
+};
+
+export const suspendOrder = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+
+    await suspendOrderService(id as string);
+
+    res.status(200).json({
+      success: true,
+      message: "Order suspended successfully.",
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getAdminOrderDetails = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+
+    const order =
+      await getAdminOrderDetailsService(id as string);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch order details",
     });
   }
 };

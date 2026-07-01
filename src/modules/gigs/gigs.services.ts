@@ -201,3 +201,28 @@ export const deleteGigFromDB = async (
 
   return result;
 };
+
+
+export const updateGigStatusService = async (
+  id: string,
+  status: "active" | "suspended"
+) => {
+  const db = getDB();
+
+  const result = await db.collection("gigs").updateOne(
+    {
+      _id: new ObjectId(id),
+    },
+    {
+      $set: {
+        status,
+      },
+    }
+  );
+
+  if (result.matchedCount === 0) {
+    return null;
+  }
+
+  return result;
+};
